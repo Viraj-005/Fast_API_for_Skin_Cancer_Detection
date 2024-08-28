@@ -47,7 +47,7 @@ jobs:
         if: steps.cache-venv.outputs.cache-hit != 'true'
       - name: Create archive of dependencies
         run: |
-          cd ./venv/lib/python3.12.4/site-packages
+          cd ./venv/lib/uvicorn/site-packages
           zip -r9 ../../../../api.zip .
       - name: Add API files to Zip file
         run: cd ./api && zip -g ../api.zip -r .
