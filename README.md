@@ -1,8 +1,8 @@
 ![Logo](fastapi.png)
 
-# Skin Cancer Detection API
+# FastAPI for Skin Cancer Detection
 
-This FastAPI-based application allows users to upload skin images and detect whether skin cancer is present or not. The API uses a deep learning model to classify images and provides the results with accuracy levels.
+This FastAPI-based application allows users to upload skin images and detect whether skin cancer is present or not. The API uses a deep learning model to classify images and provides accurate results.
 
 ## Table of Contents
 - [Features](#features)
@@ -21,11 +21,11 @@ This FastAPI-based application allows users to upload skin images and detect whe
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/skin-cancer-detection-api.git
+   git clone https://github.com/your-username/Fast_API_for_Skin_Cancer_Detection.git
    ```
 2. **Navigate to the Project Directory:**
    ```bash
-   cd skin-cancer-detection-api
+   cd Fast_API_for_Skin_Cancer_Detection
    ```
 3. **Set Up a Virtual Environment (Optional but Recommended):**
    ```bash
