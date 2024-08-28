@@ -55,7 +55,7 @@ jobs:
       - name: Add API Files to Zip File
         run: |
           cd ../../..
-          zip -g venv/lib/python3.12/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt
+          zip -g venv/lib/python3.12/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
 
       # Step-8: Upload Zip File Artifact
       - name: Upload zip file artifact
