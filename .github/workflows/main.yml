@@ -32,23 +32,30 @@ jobs:
             ${{ runner.os }}-venv-
 
       # Step-4: Build and Activate Virtual ENV, Install Dependencies
-      - name: Activate Virtual ENV and Install Dependencies
-        run: python -m venv venv && source venv/bin/activate && pip3 install -r requirements.txt
+      - name: Build and Activate Virtual ENV, Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
         if: steps.cache-venv.outputs.cache-hit != 'true'
 
       # Step-5: Run Tests
       - name: Run Tests   
-        run: . venv/bin/activate && pytest
+        run: |
+          . venv/bin/activate
+          pytest --disable-warnings
 
       # Step-6: Create Archive of Dependencies
       - name: Create Archive of Dependencies
         run: |
-          cd ./venv/lib/python3.12/site-packages
+          cd venv/lib/python3.12/site-packages
           zip -r9 ../../../../api.zip .
 
       # Step-7: Add API Files to Zip File
       - name: Add API Files to Zip File
-        run: cd ../.. && zip -g ./venv/lib/python3.7/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt
+        run: |
+          cd ../../..
+          zip -g venv/lib/python3.12/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt
 
       # Step-8: Upload Zip File Artifact
       - name: Upload zip file artifact
