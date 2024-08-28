@@ -7,3 +7,4 @@ Pillow
 python-multipart
 pytest
 requests
+httpx
