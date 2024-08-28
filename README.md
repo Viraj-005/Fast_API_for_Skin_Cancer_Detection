@@ -60,7 +60,7 @@ This FastAPI-based application allows users to upload skin images and detect whe
 skin-cancer-detection-api/
 │
 ├── main.py                # Main application file
-├── skin_cancer_model.h5   # skin cancer model file
+├── skin_cancer_model.h5   # Skin cancer model file
 ├── requirements.txt       # List of dependencies
 ├── README.md              # Project documentation
 └── .gitignore             # Git ignore file
