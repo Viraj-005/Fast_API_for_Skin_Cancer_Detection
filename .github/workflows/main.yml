@@ -42,18 +42,18 @@ jobs:
       # Step-5: Create Archive of Dependencies
       - name: Create Archive of Dependencies
         run: |
-          cd venv/lib/site-packages
+          cd venv/lib/python3.12.4/site-packages
           zip -r9 ../../../../api.zip .
 
       # Step-6: Add API Files to Zip File
       - name: Add API Files to Zip File
         run: |
           cd ../../..
-          zip -g venv/lib/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
+          zip -g venv/lib/python3.12.4/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
 
       # Step-7: Upload Zip File Artifact
       - name: Upload zip file artifact
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: venv/lib/site-packages/api.zip
+          path: venv/lib/python3.12.4/site-packages/api.zip
