@@ -5,6 +5,7 @@ from tensorflow.keras.models import load_model # type: ignore
 from PIL import Image
 import io
 import logging
+from mangum import Mangum
 
 app = FastAPI()
 logger = logging.getLogger(__name__)
@@ -41,6 +42,8 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 @app.get('/')
 def read_root():
     return {'message': 'Skin Cancer Detection Model API'}
+
+handler = Mangum(app=app)
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(file: UploadFile = File(...)):

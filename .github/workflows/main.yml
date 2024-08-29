@@ -1,59 +1,57 @@
-name: FastAPI CI/CD
+name: Deploy to AWS Lambda (CI/CD)
 
 on:
   push:
-    branches: 
-      - main 
+    branches:
+      - main  # Trigger deployment on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger deployment on pull requests targeting the main branch
 
 jobs:
-  CI:
+  deploy:
     runs-on: ubuntu-latest
-    steps:   
-      - uses: actions/checkout@v2
-      
-      # Step-1: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.12.4
 
-      # Step-2: Install Python Virtual ENV
-      - name: Install Python Virtual ENV
-        run: pip3 install virtualenv
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # Step-3: Setup Virtual ENV
-      - name: Cache Virtual ENV
-        uses: actions/cache@v2
-        id: cache-venv 
-        with:
-          path: venv 
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'  # Use the appropriate Python version for your FastAPI app
 
-      # Step-4: Build and Activate Virtual ENV, Install Dependencies
-      - name: Build and Activate Virtual ENV, Install Dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+    - name: Install Python Virtual ENV
+      run: pip3 install virtualenv
+   
+    - name: Cache Virtual ENV
+      uses: actions/cache@v2
+      id: cache-venv 
+      with:
+        path: venv 
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-venv-
 
-      # Step-5: Create Archive of Dependencies
-      - name: Create Archive of Dependencies
-        run: |
-          cd venv/lib/python3.12.4/site-packages
-          zip -r9 ../../../../api.zip .
+    - name: Build and Activate Virtual ENV, Install Dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+      if: steps.cache-venv.outputs.cache-hit != 'true'
 
-      # Step-6: Add API Files to Zip File
-      - name: Add API Files to Zip File
-        run: |
-          cd ../../..
-          zip -g venv/lib/python3.12.4/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
+    - name: Package Lambda function
+      run: |
+        cp -r ./* ./package/
+        cd package && zip -r ../function.zip .
 
-      # Step-7: Upload Zip File Artifact
-      - name: Upload zip file artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: api
-          path: venv/lib/python3.12.4/site-packages/api.zip
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}  # Change to your AWS region
+
+    - name: Deploy to AWS Lambda
+      run: |
+        aws lambda update-function-code --function-name your-lambda-function-name --zip-file fileb://function.zip
