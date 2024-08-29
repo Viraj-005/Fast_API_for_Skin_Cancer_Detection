@@ -6,5 +6,4 @@ tensorflow
 Pillow
 python-multipart
 httpx
-h5py
 mangum

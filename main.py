@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 import numpy as np
 from tensorflow.keras.models import load_model # type: ignore
@@ -12,12 +12,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Load your trained model
-try:
-    model = load_model('skin_cancer_model.h5')
-    logger.info("Model loaded successfully.")
-except Exception as e:
-    logger.error(f"Failed to load model: {e}")
-    raise RuntimeError("Model loading failed.") from e
+model = load_model('skin_cancer_model.h5')
 
 class PredictionResponse(BaseModel):
     prediction: str
@@ -43,22 +38,13 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 def read_root():
     return {'message': 'Skin Cancer Detection Model API'}
 
-handler = Mangum(app=app)
+handler = Mangum(app)
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(file: UploadFile = File(...)):
     try:
-        # Ensure the file is not empty
-        if not file.filename:
-            raise HTTPException(status_code=400, detail="No file uploaded")
-        
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
-
-        # Validate that the image is in a supported format
-        if image.format not in ['JPEG', 'PNG', 'JPG']:
-            raise HTTPException(status_code=400, detail="Unsupported image format. Please upload a JPEG or PNG image.")
-
         input_data = preprocess_image(image)
         
         # Make the prediction
@@ -71,7 +57,10 @@ async def predict(file: UploadFile = File(...)):
         logger.info(f"Predicted class: {predicted_class}")
 
         # Map predicted_class to human-readable label
-        label = "Non-cancerous" if predicted_class == 0 else "Cancerous"
+        if predicted_class == 0:
+            label = "Non-cancerous"
+        else:
+            label = "Cancerous"
 
         # Optional: Apply a threshold to make the classification more robust
         threshold = 0.5  # Adjust the threshold if necessary
@@ -83,4 +72,4 @@ async def predict(file: UploadFile = File(...)):
         return PredictionResponse(prediction=label, probability=float(probability))
     except Exception as e:
         logger.error(f"Error processing file: {e}")
-        raise HTTPException(status_code=500, detail="Failed to process file")
+        return {"error": "Failed to process file"}
