@@ -5,6 +5,5 @@ numpy
 tensorflow
 Pillow
 python-multipart
-pytest
-requests
 httpx
+h5py

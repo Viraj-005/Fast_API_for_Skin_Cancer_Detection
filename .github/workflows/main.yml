@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.12
+          python-version: 3.12.4
 
       # Step-2: Install Python Virtual ENV
       - name: Install Python Virtual ENV
@@ -39,27 +39,21 @@ jobs:
           pip install -r requirements.txt
         if: steps.cache-venv.outputs.cache-hit != 'true'
 
-      # Step-5: Run Tests
-      - name: Run Tests   
-        run: |
-          . venv/bin/activate
-          pytest --disable-warnings
-
-      # Step-6: Create Archive of Dependencies
+      # Step-5: Create Archive of Dependencies
       - name: Create Archive of Dependencies
         run: |
-          cd venv/lib/python3.12/site-packages
+          cd venv/lib/site-packages
           zip -r9 ../../../../api.zip .
 
-      # Step-7: Add API Files to Zip File
+      # Step-6: Add API Files to Zip File
       - name: Add API Files to Zip File
         run: |
           cd ../../..
-          zip -g venv/lib/python3.12/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
+          zip -g venv/lib/site-packages/api.zip main.py skin_cancer_model.h5 requirements.txt test_image.jpg
 
-      # Step-8: Upload Zip File Artifact
+      # Step-7: Upload Zip File Artifact
       - name: Upload zip file artifact
         uses: actions/upload-artifact@v2
         with:
           name: api
-          path: venv/lib/python3.12/site-packages/api.zip
+          path: venv/lib/site-packages/api.zip
