@@ -23,7 +23,7 @@ jobs:
 
     - name: Install Python Virtual ENV
       run: pip3 install virtualenv
-   
+
     - name: Cache Virtual ENV
       uses: actions/cache@v2
       id: cache-venv 
@@ -40,11 +40,16 @@ jobs:
         pip install -r requirements.txt
       if: steps.cache-venv.outputs.cache-hit != 'true'
 
-    - name: Package Lambda function
+    - name: Package Lambda Layer
+      run: |
+        mkdir -p python
+        pip install -r requirements.txt -t python/
+        cd python && zip -r ../layer.zip .
+
+    - name: Package Lambda Function
       run: |
         mkdir -p package
-        shopt -s extglob
-        cp -r !(package) ./package/
+        cp -r main.py skin_cancer_model.h5 ./package/
         cd package && zip -r ../function.zip .
 
     - name: Configure AWS credentials
@@ -54,15 +59,33 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_DEFAULT_REGION }}  # Change to your AWS region
 
-    - name: Upload to S3
+    - name: Upload Lambda Layer to S3
+      run: aws s3 cp layer.zip s3://fastapiscd/layer.zip
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+    - name: Upload Lambda Function to S3
       run: aws s3 cp function.zip s3://fastapiscd/function.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
-    - name: Deploy new Lambda
-      run: aws lambda update-function-code --function-name fastapi --s3-bucket fastapiscd --s3-key function.zip
+    - name: Deploy Lambda Layer
+      run: |
+        LAYER_VERSION=$(aws lambda publish-layer-version --layer-name fastapi-layer --content S3Bucket=fastapiscd,S3Key=layer.zip --compatible-runtimes python3.12 --query 'LayerVersionArn' --output text)
+        echo "Layer version ARN: $LAYER_VERSION"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+    - name: Deploy Lambda Function
+      run: |
+        aws lambda update-function-code --function-name fastapi --s3-bucket fastapiscd --s3-key function.zip
+        aws lambda update-function-configuration --function-name fastapi --layers $LAYER_VERSION
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
