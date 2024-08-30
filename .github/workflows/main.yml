@@ -43,8 +43,10 @@ jobs:
     - name: Package Lambda function
       run: |
         mkdir -p package
-        cp -r ./* ./package/
+        shopt -s extglob
+        cp -r !(package) ./package/
         cd package && zip -r ../function.zip .
+    
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v3
