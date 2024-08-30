@@ -55,7 +55,7 @@ jobs:
         aws-region: ${{ secrets.AWS_DEFAULT_REGION }}  # Change to your AWS region
 
     - name: Upload to S3
-      run: aws s3 cp api.zip s3://fastapiforscd/function.zip
+      run: aws s3 cp function.zip s3://fastapiforscd/function.zip
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
