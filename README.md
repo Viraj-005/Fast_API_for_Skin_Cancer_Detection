@@ -4,6 +4,8 @@
 
 This FastAPI-based application allows users to upload skin images and detect whether skin cancer is present or not. The API uses a deep learning model to classify images and provides accurate results.
 
+You can find this FastApi on AWS: https://dimlhaqoookmd5gevimmcodyhe0vudeh.lambda-url.us-east-1.on.aws/ 🌐
+
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
